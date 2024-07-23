@@ -1,12 +1,13 @@
 from datetime import datetime
+from typing import Optional
 
 from fastapi import Depends
 from fastapi_users.db import SQLAlchemyBaseUserTable, SQLAlchemyUserDatabase
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.ext.asyncio import AsyncSession
 from database import Base, get_async_session
-
+from task.models import Task
 
 class User(SQLAlchemyBaseUserTable[int], Base):
     __tablename__ = "users"
@@ -20,6 +21,9 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
     is_superuser: Mapped[bool] = mapped_column(default=False, nullable=False)
     is_verified: Mapped[bool] = mapped_column(default=False, nullable=False)
+    tasks: Mapped[Optional[list["Task"]]] = relationship(
+        secondary="user_task_table", back_populates="users"
+    )
 
     def __repr__(self):
         return self.username
