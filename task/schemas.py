@@ -8,10 +8,22 @@ class TaskAdd(BaseModel):
 
 class TaskRead(TaskAdd):
     id: int
+    class Config:
+        from_attributes = True
 
 
 from auth.schemas import UserRead
 
 
+class UserTaskRead(BaseModel):
+    completed: bool
+    user: UserRead
+
+
+class TaskUserRead(BaseModel):
+    completed: bool
+    task: TaskRead
+
+
 class TaskRel(TaskRead):
-    users: list["UserRead"]
+    users: list[UserTaskRead]

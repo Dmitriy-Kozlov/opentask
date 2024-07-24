@@ -4,7 +4,7 @@ from auth.usermanager import auth_backend, fastapi_users
 from auth.schemas import UserCreate, UserRead
 from starlette.middleware.sessions import SessionMiddleware
 from sqladmin import Admin
-from admin import authentication_backend, UserAdmin, TaskAdmin
+from admin import authentication_backend, UserAdmin, TaskAdmin, UserTaskAdmin
 from task.router import router as task_router
 from config import SECRET
 
@@ -28,3 +28,4 @@ app.include_router(
 admin = Admin(app, engine, authentication_backend=authentication_backend)
 admin.add_view(UserAdmin)
 admin.add_view(TaskAdmin)
+admin.add_view(UserTaskAdmin)

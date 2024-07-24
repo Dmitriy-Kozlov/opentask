@@ -25,9 +25,9 @@ class UserCreate(schemas.BaseUserCreate):
     is_verified: Optional[bool] = False
 
 
-from task.schemas import TaskRead
+from task.schemas import TaskUserRead
 
 
 class UserRel(UserRead):
-    tasks: list[TaskRead]
+    tasks: list[TaskUserRead]
 

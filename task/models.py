@@ -1,15 +1,20 @@
-from typing import List, Optional
+from typing import List
 
-from sqlalchemy import String, Table, Column, ForeignKey
+from sqlalchemy import String, Column, ForeignKey, Boolean
 from database import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-association_table = Table(
-    "user_task_table",
-    Base.metadata,
-    Column("users_id", ForeignKey("users.id"), primary_key=True),
-    Column("tasks_id", ForeignKey("tasks.id"), primary_key=True),
-)
+
+class UserTask(Base):
+    __tablename__ = 'user_task_table'
+    users_id = Column(ForeignKey('users.id'), primary_key=True)
+    tasks_id = Column(ForeignKey('tasks.id'), primary_key=True)
+    completed = Column(Boolean, default=False)
+    task = relationship("Task", back_populates="users")
+    user = relationship("User", back_populates="tasks")
+
+    def __repr__(self):
+        return f"Task {self.tasks_id} for user {self.users_id}"
 
 
 class Task(Base):
@@ -18,6 +23,7 @@ class Task(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     headline: Mapped[str] = mapped_column(String(256))
     text: Mapped[str]
-    users: Mapped[Optional[list["User"]]] = relationship(
-        secondary="user_task_table", back_populates="tasks"
-    )
+    users: Mapped[List["UserTask"]] = relationship(back_populates="task")
+
+    def __repr__(self):
+        return self.headline

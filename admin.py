@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from sqladmin.authentication import AuthenticationBackend
 from starlette.requests import Request
 from auth.models import User
-from task.models import Task
+from task.models import Task, UserTask
 from sqladmin import ModelView
 from config import SECRET
 
@@ -30,3 +30,6 @@ class UserAdmin(ModelView, model=User):
 class TaskAdmin(ModelView, model=Task):
     column_list = [Task.id, Task.headline]
 
+
+class UserTaskAdmin(ModelView, model=UserTask):
+    column_list = [UserTask.task, UserTask.user, UserTask.completed]
