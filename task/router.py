@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
+from sqlalchemy.exc import NoResultFound
 
 from auth.usermanager import current_active_user
 from database import get_async_session
@@ -40,3 +41,19 @@ async def get_tasks(session: AsyncSession = Depends(get_async_session),
     tasks = result.unique().scalars().all()
 
     return tasks
+
+
+@router.get("/{task_id}", response_model=TaskUserRead)
+async def get_tasks(task_id: int,
+                    session: AsyncSession = Depends(get_async_session),
+                    user: User = Depends(current_active_user),
+                    ):
+    try:
+        query = (select(UserTask).filter_by(tasks_id=task_id).filter_by(users_id=user.id)
+                .options(joinedload(UserTask.task)))
+
+        result = await session.execute(query)
+        task = result.scalars().one()
+        return task
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail="Item not found")
