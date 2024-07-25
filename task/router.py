@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.exc import NoResultFound
 
 from auth.usermanager import current_active_user
@@ -91,3 +91,23 @@ async def create_task(new_task: TaskAdd,
     session.add(new_task_db)
     await session.commit()
     return {"message": "Task created"}
+
+
+@router.put("/{task_id}", response_model=TaskRel)
+async def update_task_add_users(task_id: int, users_id: list[int],
+                      session: AsyncSession = Depends(get_async_session),
+                      user: User = Depends(current_active_user)):
+    if not user.is_superuser:
+        raise HTTPException(status_code=403, detail="Not authorized to update task")
+    try:
+        query = select(Task).filter_by(id=task_id).options(joinedload(Task.users).joinedload(UserTask.user))
+        result = await session.execute(query)
+        task = result.unique().scalars().one()
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail="Task not found")
+    for id in users_id:
+        new_user_task = UserTask(users_id=id, tasks_id=task_id)
+        session.add(new_user_task)
+        await session.commit()
+    await session.refresh(task)
+    return task
