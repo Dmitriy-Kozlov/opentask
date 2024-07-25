@@ -7,7 +7,7 @@ from auth.usermanager import current_active_user
 from database import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from .models import Task, UserTask
-from .schemas import TaskRel, TaskUserRead
+from .schemas import TaskRel, TaskUserRead, TaskAdd
 from auth.models import User
 
 router = APIRouter(
@@ -25,7 +25,7 @@ async def get_tasks(session: AsyncSession = Depends(get_async_session)):
 
 
 @router.get("/me", response_model=list[TaskUserRead])
-async def get_tasks(session: AsyncSession = Depends(get_async_session),
+async def get_my_tasks(session: AsyncSession = Depends(get_async_session),
                     user: User = Depends(current_active_user),
                     is_completed: bool = None
                     ):
@@ -44,7 +44,7 @@ async def get_tasks(session: AsyncSession = Depends(get_async_session),
 
 
 @router.get("/{task_id}", response_model=TaskUserRead)
-async def get_tasks(task_id: int,
+async def get_task_by_id(task_id: int,
                     session: AsyncSession = Depends(get_async_session),
                     user: User = Depends(current_active_user),
                     ):
@@ -60,7 +60,7 @@ async def get_tasks(task_id: int,
 
 
 @router.post("/{task_id}/complete")
-async def get_tasks(task_id: int,
+async def complete_task(task_id: int,
                     session: AsyncSession = Depends(get_async_session),
                     user: User = Depends(current_active_user),
                     ):
@@ -78,3 +78,16 @@ async def get_tasks(task_id: int,
         return {"message": f"Task {task_id} completed"}
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Task not found")
+
+
+@router.post("/")
+async def create_task(new_task: TaskAdd,
+                      session: AsyncSession = Depends(get_async_session),
+                      user: User = Depends(current_active_user),
+                      ):
+    if not user.is_superuser:
+        raise HTTPException(status_code=403, detail="Not authorized to create task")
+    new_task_db = Task(**new_task.dict())
+    session.add(new_task_db)
+    await session.commit()
+    return {"message": "Task created"}
