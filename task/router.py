@@ -56,4 +56,25 @@ async def get_tasks(task_id: int,
         task = result.scalars().one()
         return task
     except NoResultFound:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=404, detail="Task not found")
+
+
+@router.post("/{task_id}/complete")
+async def get_tasks(task_id: int,
+                    session: AsyncSession = Depends(get_async_session),
+                    user: User = Depends(current_active_user),
+                    ):
+    try:
+        query = (select(UserTask)
+                 .filter_by(tasks_id=task_id)
+                 .filter_by(users_id=user.id))
+        result = await session.execute(query)
+        task = result.scalars().one()
+        if task.completed:
+            raise HTTPException(status_code=403, detail="Task already completed")
+        task.completed = True
+        session.add(task)
+        await session.commit()
+        return {"message": f"Task {task_id} completed"}
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail="Task not found")
