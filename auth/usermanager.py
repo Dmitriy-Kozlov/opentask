@@ -7,9 +7,13 @@ from fastapi_users.authentication import (
     JWTStrategy,
 )
 import jwt
+from sqlalchemy import select
+
 from config import SECRET
 
 from fastapi_users.db import SQLAlchemyUserDatabase
+
+from database import async_session_maker
 from .models import User, get_user_db
 from fastapi_users.jwt import generate_jwt, decode_jwt
 
@@ -88,3 +92,11 @@ auth_backend = AuthenticationBackend(
 fastapi_users = FastAPIUsers[User, int](get_user_manager, [auth_backend])
 
 current_active_user = fastapi_users.current_user(active=True)
+
+
+async def get_all_users():
+    async with async_session_maker() as session:
+        query = select(User)
+        result = await session.execute(query)
+        users = result.scalars().all()
+        return users

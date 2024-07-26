@@ -3,7 +3,8 @@ from sqlalchemy import select, delete
 from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.exc import NoResultFound
 
-from auth.usermanager import current_active_user
+from auth.schemas import UserRead, UserLinkToTask
+from auth.usermanager import current_active_user, get_all_users
 from database import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from .models import Task, UserTask
@@ -94,7 +95,7 @@ async def create_task(new_task: TaskAdd,
 
 
 @router.put("/{task_id}", response_model=TaskRel)
-async def update_task_add_users(task_id: int, new_users_id: set[int],
+async def update_task_add_users(task_id: int, new_users: list[UserLinkToTask],
                       session: AsyncSession = Depends(get_async_session),
                       user: User = Depends(current_active_user)):
     if not user.is_superuser:
@@ -108,17 +109,18 @@ async def update_task_add_users(task_id: int, new_users_id: set[int],
     query = select(User.id)
     result = await session.execute(query)
     user_id_from_db = set(result.scalars().all())
+    new_users_id = {x.id for x in new_users}
     if not new_users_id.issubset(user_id_from_db):
-        raise HTTPException(status_code=404, detail="Given user list not in database")
+        raise HTTPException(status_code=404, detail="Users not in database")
     old_task_user_id = {x.users_id for x in task.users}
     inter_user_id = old_task_user_id.intersection(new_users_id)
-    for u_id in new_users_id:
-        if u_id not in inter_user_id:
-            new_user_task = UserTask(users_id=u_id, tasks_id=task_id)
+    for _id in new_users_id:
+        if _id not in inter_user_id:
+            new_user_task = UserTask(users_id=_id, tasks_id=task_id)
             session.add(new_user_task)
-    for u_id in old_task_user_id:
-        if u_id not in inter_user_id:
-            stmt = delete(UserTask).filter_by(users_id=u_id).filter_by(tasks_id=task_id)
+    for _id in old_task_user_id:
+        if _id not in inter_user_id:
+            stmt = delete(UserTask).filter_by(users_id=_id).filter_by(tasks_id=task_id)
             await session.execute(stmt)
     await session.commit()
     await session.refresh(task)

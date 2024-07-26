@@ -1,4 +1,5 @@
 from typing import Optional
+from pydantic import BaseModel
 
 from fastapi_users import schemas
 
@@ -31,3 +32,6 @@ from task.schemas import TaskUserRead
 class UserRel(UserRead):
     tasks: list[TaskUserRead]
 
+
+class UserLinkToTask(BaseModel):
+    id: int
