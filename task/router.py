@@ -130,31 +130,8 @@ async def complete_task(task_id: int,
         raise HTTPException(status_code=404, detail="Task not found")
 
 
-# @router.post("/")
-# async def create_task(new_task: TaskAdd,
-#                       session: AsyncSession = Depends(get_async_session),
-#                       user: User = Depends(current_active_user),
-#                       ):
-#     if not user.is_superuser:
-#         raise HTTPException(status_code=403, detail="Not authorized to create task")
-#     new_task_db = Task(**new_task.dict())
-#     session.add(new_task_db)
-#     await session.commit()
-#     return {"message": "Task created"}
-
-
-def checker(data: str = Form(...)):
-    try:
-        return TaskAdd.model_validate_json(data)
-    except ValidationError as e:
-        raise HTTPException(
-            detail=jsonable_encoder(e.errors()),
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        )
-
-
 @router.post("/")
-async def create_task(new_task: TaskAdd = Depends(checker),
+async def create_task(new_task: TaskAdd = Depends(),
                       file: UploadFile | None = None,
                       session: AsyncSession = Depends(get_async_session),
                       user: User = Depends(current_active_user),
@@ -166,7 +143,6 @@ async def create_task(new_task: TaskAdd = Depends(checker),
     await session.flush()
     if file:
         os.makedirs(f"static/taskfiles/{new_task_db.id}", exist_ok=True)
-        print(os.path.isdir(f"static/taskfiles/{new_task_db.id}"))
         with open(f"static/taskfiles/{new_task_db.id}/{file.filename}", "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         new_task_db.file_name = file.filename
