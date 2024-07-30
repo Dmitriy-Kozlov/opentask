@@ -23,6 +23,8 @@ class Task(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     headline: Mapped[str] = mapped_column(String(256))
     text: Mapped[str]
+    file_name: Mapped[str] = mapped_column(String(200), nullable=True)
+    file_mimetype: Mapped[str] = mapped_column(String(100), nullable=True)
     users: Mapped[List["UserTask"]] = relationship(back_populates="task")
 
     def __repr__(self):

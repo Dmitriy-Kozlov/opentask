@@ -1,7 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
+import os
+import shutil
+from typing import List
+
+from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile, File
+from fastapi.encoders import jsonable_encoder
+from pydantic import ValidationError
 from sqlalchemy import select, delete
 from sqlalchemy.orm import joinedload, selectinload, contains_eager
 from sqlalchemy.exc import NoResultFound
+from starlette import status
 
 from auth.schemas import UserRead, UserLinkToTask
 from auth.usermanager import current_active_user, get_all_users
@@ -37,7 +44,7 @@ async def get_tasks(session: AsyncSession = Depends(get_async_session),
     if not user.is_superuser:
         raise HTTPException(status_code=403, detail="Not authorized to get tasklist")
     query = (
-        select(Task).join(Task.users).join(UserTask.user)
+        select(Task).outerjoin(Task.users).outerjoin(UserTask.user)
         .options(contains_eager(Task.users).contains_eager(UserTask.user))
     )
     if is_completed is not None:
@@ -103,8 +110,32 @@ async def complete_task(task_id: int,
         raise HTTPException(status_code=404, detail="Task not found")
 
 
+# @router.post("/")
+# async def create_task(new_task: TaskAdd,
+#                       session: AsyncSession = Depends(get_async_session),
+#                       user: User = Depends(current_active_user),
+#                       ):
+#     if not user.is_superuser:
+#         raise HTTPException(status_code=403, detail="Not authorized to create task")
+#     new_task_db = Task(**new_task.dict())
+#     session.add(new_task_db)
+#     await session.commit()
+#     return {"message": "Task created"}
+
+
+def checker(data: str = Form(...)):
+    try:
+        return TaskAdd.model_validate_json(data)
+    except ValidationError as e:
+        raise HTTPException(
+            detail=jsonable_encoder(e.errors()),
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        )
+
+
 @router.post("/")
-async def create_task(new_task: TaskAdd,
+async def create_task(new_task: TaskAdd = Depends(checker),
+                      file: UploadFile | None = None,
                       session: AsyncSession = Depends(get_async_session),
                       user: User = Depends(current_active_user),
                       ):
@@ -112,6 +143,14 @@ async def create_task(new_task: TaskAdd,
         raise HTTPException(status_code=403, detail="Not authorized to create task")
     new_task_db = Task(**new_task.dict())
     session.add(new_task_db)
+    await session.flush()
+    if file:
+        os.makedirs(f"static/taskfiles/{new_task_db.id}", exist_ok=True)
+        print(os.path.isdir(f"static/taskfiles/{new_task_db.id}"))
+        with open(f"static/taskfiles/{new_task_db.id}/{file.filename}", "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        new_task_db.file_name = file.filename
+        new_task_db.file_mimetype = file.content_type
     await session.commit()
     return {"message": "Task created"}
 

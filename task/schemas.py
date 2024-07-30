@@ -8,6 +8,8 @@ class TaskAdd(BaseModel):
 
 class TaskRead(TaskAdd):
     id: int
+    file_name: str | None
+    file_mimetype: str | None
     class Config:
         from_attributes = True
 
