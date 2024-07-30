@@ -9,6 +9,7 @@ from sqlalchemy import select, delete
 from sqlalchemy.orm import joinedload, selectinload, contains_eager
 from sqlalchemy.exc import NoResultFound
 from starlette import status
+from starlette.responses import FileResponse
 
 from auth.schemas import UserRead, UserLinkToTask
 from auth.usermanager import current_active_user, get_all_users
@@ -85,6 +86,25 @@ async def get_task_by_id(task_id: int,
         result = await session.execute(query)
         task = result.scalars().one()
         return task
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+
+@router.get("/{task_id}/download", response_model=TaskUserRead)
+async def download(
+        task_id: int,
+        session: AsyncSession = Depends(get_async_session),
+        user: User = Depends(current_active_user)):
+    try:
+        query = (select(UserTask).filter_by(tasks_id=task_id).filter_by(users_id=user.id)
+                 .options(joinedload(UserTask.task)))
+
+        result = await session.execute(query)
+        task = result.scalars().one()
+        if not task.task.file_name:
+            raise HTTPException(status_code=404, detail="File not found")
+        path = f"static/taskfiles/{task_id}/{task.task.file_name}"
+        return FileResponse(path, media_type='application/octet-stream', filename=task.task.file_name)
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Task not found")
 
