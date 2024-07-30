@@ -26,10 +26,16 @@ class UserCreate(schemas.BaseUserCreate):
     is_verified: Optional[bool] = False
 
 
+class UserReadSimple(BaseModel):
+    id: int
+    email: str
+    username: str
+
+
 from task.schemas import TaskUserRead
 
 
-class UserRel(UserRead):
+class UserRel(UserReadSimple):
     tasks: list[TaskUserRead]
 
 

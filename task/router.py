@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, delete
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import joinedload, selectinload, contains_eager
 from sqlalchemy.exc import NoResultFound
 
 from auth.schemas import UserRead, UserLinkToTask
@@ -16,10 +16,32 @@ router = APIRouter(
     tags=["tasks"]
 )
 
+"""
+query = (
+        select(Task.id, Task.headline, UserTask.completed, func.group_concat(User.username).label('users'))
+        .join(UserTask, UserTask.tasks_id == Task.id)
+        .join(User, User.id == UserTask.users_id)
+        .filter(UserTask.completed == is_completed)
+        .group_by(Task.id)
+    )
+    result = await session.execute(query)
+    tasks = result.mapping().all()
+"""
+
 
 @router.get("/", response_model=list[TaskRel])
-async def get_tasks(session: AsyncSession = Depends(get_async_session)):
-    query = select(Task).options(joinedload(Task.users).joinedload(UserTask.user))
+async def get_tasks(session: AsyncSession = Depends(get_async_session),
+                    is_completed: bool = None,
+                    user: User = Depends(current_active_user)
+                    ):
+    if not user.is_superuser:
+        raise HTTPException(status_code=403, detail="Not authorized to get tasklist")
+    query = (
+        select(Task).join(Task.users).join(UserTask.user)
+        .options(contains_eager(Task.users).contains_eager(UserTask.user))
+    )
+    if is_completed is not None:
+        query = query.filter(UserTask.completed == is_completed)
     result = await session.execute(query)
     tasks = result.unique().scalars().all()
     return tasks

@@ -12,12 +12,12 @@ class TaskRead(TaskAdd):
         from_attributes = True
 
 
-from auth.schemas import UserRead
+from auth.schemas import UserRead, UserReadSimple
 
 
 class UserTaskRead(BaseModel):
     completed: bool
-    user: UserRead
+    user: UserReadSimple
 
 
 class TaskUserRead(BaseModel):
