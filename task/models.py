@@ -1,8 +1,11 @@
-from typing import List
+import datetime
+from typing import List, Optional, Annotated
 
-from sqlalchemy import String, Column, ForeignKey, Boolean
+from sqlalchemy import String, Column, ForeignKey, Boolean, text, func, DateTime
 from database import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+created_at = Annotated[datetime.datetime, mapped_column(DateTime(), server_default=func.now())]
 
 
 class UserTask(Base):
@@ -23,9 +26,25 @@ class Task(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     headline: Mapped[str] = mapped_column(String(256))
     text: Mapped[str]
-    file_name: Mapped[str] = mapped_column(String(200), nullable=True)
-    file_mimetype: Mapped[str] = mapped_column(String(100), nullable=True)
+    created_at: Mapped[created_at]
+    files: Mapped[List["TaskFile"]] = relationship(back_populates="task")
     users: Mapped[List["UserTask"]] = relationship(back_populates="task")
 
     def __repr__(self):
         return self.headline
+
+
+class TaskFile(Base):
+    __tablename__ = "taskfiles"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(200))
+    mimetype: Mapped[str] = mapped_column(String(100))
+    created_at: Mapped[created_at]
+    task_id: Mapped[Optional[int]] = mapped_column(ForeignKey("tasks.id", ondelete="CASCADE"))
+    owner_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    task: Mapped["Task"] = relationship(back_populates="files")
+    owner: Mapped["User"] = relationship(back_populates="files")
+
+    def __repr__(self):
+        return self.name

@@ -1,4 +1,15 @@
+from datetime import datetime
 from pydantic import BaseModel
+
+
+class FileAdd(BaseModel):
+    name: str
+    mimetype: str
+
+
+class FileRead(FileAdd):
+    id: int
+    created_at: datetime
 
 
 class TaskAdd(BaseModel):
@@ -8,8 +19,8 @@ class TaskAdd(BaseModel):
 
 class TaskRead(TaskAdd):
     id: int
-    file_name: str | None
-    file_mimetype: str | None
+    created_at: datetime
+    files: list[FileRead]
     class Config:
         from_attributes = True
 
@@ -29,3 +40,4 @@ class TaskUserRead(BaseModel):
 
 class TaskRel(TaskRead):
     users: list[UserTaskRead]
+    files: list[FileRead]

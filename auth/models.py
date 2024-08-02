@@ -21,6 +21,8 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     is_superuser: Mapped[bool] = mapped_column(default=False, nullable=False)
     is_verified: Mapped[bool] = mapped_column(default=False, nullable=False)
     tasks: Mapped[List["UserTask"]] = relationship(back_populates="user")
+    files: Mapped[List["TaskFile"]] = relationship(back_populates="owner")
+
 
     def __repr__(self):
         return self.username

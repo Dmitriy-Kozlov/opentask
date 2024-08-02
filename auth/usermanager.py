@@ -74,11 +74,11 @@ async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db
     yield UserManager(user_db)
 
 
-cookie_transport = CookieTransport(cookie_name="opentasks", cookie_max_age=3600)
+cookie_transport = CookieTransport(cookie_name="opentasks", cookie_max_age=86400)
 
 
 def get_jwt_strategy() -> MyJWTStrategy:
-    return MyJWTStrategy(secret=SECRET, lifetime_seconds=3600)
+    return MyJWTStrategy(secret=SECRET, lifetime_seconds=86400)
 
 
 auth_backend = AuthenticationBackend(
