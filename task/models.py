@@ -1,7 +1,7 @@
 import datetime
 from typing import List, Optional, Annotated
 
-from sqlalchemy import String, Column, ForeignKey, Boolean, text, func, DateTime
+from sqlalchemy import String, Column, ForeignKey, Boolean, text, func, DateTime, Text
 from database import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -25,7 +25,7 @@ class Task(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     headline: Mapped[str] = mapped_column(String(256))
-    text: Mapped[str]
+    text: Mapped[str] = mapped_column(Text)
     created_at: Mapped[created_at]
     files: Mapped[List["TaskFile"]] = relationship(back_populates="task")
     users: Mapped[List["UserTask"]] = relationship(back_populates="task")

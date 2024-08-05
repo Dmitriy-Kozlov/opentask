@@ -52,14 +52,34 @@ async def get_tasks(session: AsyncSession = Depends(get_async_session),
     return tasks
 
 
+@router.get("/user/{user_id}", response_model=list[TaskUserRead])
+async def get_user_tasks(
+                    user_id: int,
+                    session: AsyncSession = Depends(get_async_session),
+                    user: User = Depends(current_active_user),
+                    is_completed: bool = None
+                    ):
+    if not user.is_superuser:
+        raise HTTPException(status_code=403, detail="Not authorized to get tasklist")
+    query = (
+        select(UserTask).options(selectinload(UserTask.task).selectinload(Task.files)).filter_by(users_id=user_id)
+    )
+    if is_completed is not None:
+        query = query.filter(UserTask.completed == is_completed)
+
+    result = await session.execute(query)
+    tasks = result.unique().scalars().all()
+
+    return tasks
+
+
 @router.get("/me", response_model=list[TaskUserRead])
 async def get_my_tasks(session: AsyncSession = Depends(get_async_session),
                     user: User = Depends(current_active_user),
                     is_completed: bool = None
                     ):
     query = (
-        select(UserTask).outerjoin(UserTask.task).outerjoin(Task.files)
-        .options(contains_eager(UserTask.task).contains_eager(Task.files))
+        select(UserTask).options(selectinload(UserTask.task).selectinload(Task.files)).filter_by(users_id=user.id)
     )
     if is_completed is not None:
         query = query.filter(UserTask.completed == is_completed)
@@ -146,7 +166,7 @@ async def complete_task(task_id: int,
 
 
 @router.post("/")
-async def create_task(new_task: TaskAdd = Depends(),
+async def create_task(new_task: TaskAdd,
                       session: AsyncSession = Depends(get_async_session),
                       user: User = Depends(current_active_user)):
     if not user.is_superuser:

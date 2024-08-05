@@ -7,6 +7,7 @@ from sqladmin import Admin
 from admin import authentication_backend, UserAdmin, TaskAdmin, UserTaskAdmin, FileAdmin
 from task.router import router as task_router
 from auth.router import router as auth_router
+from pages.router import router as pages_router
 from config import SECRET
 
 
@@ -16,6 +17,7 @@ app = FastAPI(
 app.add_middleware(SessionMiddleware, secret_key=SECRET)
 app.include_router(task_router)
 app.include_router(auth_router)
+app.include_router(pages_router)
 
 app.include_router(
     fastapi_users.get_auth_router(auth_backend),

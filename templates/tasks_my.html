@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}
+Задачи пользователя {% if point_user %}{{point_user.lastname}}{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<h1>{{headline}}{% if point_user %} {{point_user.lastname}} {{point_user.firstname}}{% endif %}</h1>
+
+<div>
+    {% if point_user %}
+    <a href="/pages/tasks/user/{{point_user.id}}/?is_completed=true" class="card-link">Завершенные</a>
+    <a href="/pages/tasks/user/{{point_user.id}}/?is_completed=false" class="card-link">Открытые</a>
+    <a href="/pages/tasks/user/{{point_user.id}}/" class="card-link">Все</a>
+    {% else %}
+    <a href="/pages/tasks/me/?is_completed=true" class="card-link">Завершенные</a>
+    <a href="/pages/tasks/me/?is_completed=false" class="card-link">Открытые</a>
+    <a href="/pages/tasks/me/" class="card-link">Все</a>
+    {% endif %}
+</div>
+
+<div>
+    {% for task in tasks %}
+<div class="card" style="width: 28rem;">
+     {% if task.completed %}
+    <div class="card-header text-bg-success mb-3">
+    <h5 class="card-title">Завершена</h5>
+      {% else %}
+    <div class="card-header text-bg-danger mb-3">
+    <h5 class="card-title">Открытая</h5>
+      {% endif %}
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">ID: {{ task.task.id }}</h5>
+    <h6 class="card-subtitle mb-2 text-body-secondary">Заголовок: {{ task.task.headline }}</h6>
+    <p class="card-text">Описание: {{ task.task.text | truncate(150)}}</p>
+          {% if not point_user %}
+    <a href="/pages/tasks/{{task.task.id}}" class="card-link">Открыть описание</a>
+          {% endif %}
+
+  </div>
+</div>
+            {% endfor %}
+</div>
+
+{% endblock %}

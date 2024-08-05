@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}
+Все задачи
+{% endblock %}
+
+{% block content %}
+
+<h1>{{headline}}</h1>
+
+<div>
+    <a href="/pages/tasks?is_completed=true" class="card-link">Завершенные</a>
+    <a href="/pages/tasks?is_completed=false" class="card-link">Открытые</a>
+    <a href="/pages/tasks" class="card-link">Все</a>
+</div>
+
+<div>
+    {% for task in tasks %}
+<div class="card" style="width: 28rem;">
+  <div class="card-body">
+    <h5 class="card-title">
+        ID: {{ task.id }}
+    </h5>
+    <h6 class="card-subtitle mb-2 text-body-secondary">Заголовок: {{ task.headline }}</h6>
+    <p class="card-text">Описание: {{ task.text | truncate(150)}}</p>
+  </div>
+
+      <ul class="list-group list-group-flush">
+          {% for user in task.users %}
+    <li class="list-group-item">{{user.user.lastname}} {{user.user.firstname}}, статус: - {% if user.completed %}Завершена{% else %}Открыта{% endif %}</li>
+          {% endfor %}
+    <li class="list-group-item">
+          <a href="/pages/tasks/{{task.id}}/set_users">Назначить пользователей</a>
+    </li>
+  </ul>
+    <div class="card-body">
+        <p class="card-text">Файлы:</p>
+        <ul class="list-group list-group-flush">
+            {% for file in task.files %}
+            <div>
+                {{file.name}}
+            </div>
+            {% endfor %}
+        </ul>
+  </div>
+</div>
+            {% endfor %}
+</div>
+
+{% endblock %}
