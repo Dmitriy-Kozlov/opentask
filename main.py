@@ -9,11 +9,26 @@ from task.router import router as task_router
 from auth.router import router as auth_router
 from pages.router import router as pages_router
 from config import SECRET
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI(
     title="OpenTask"
 )
+
+origins = [
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.add_middleware(SessionMiddleware, secret_key=SECRET)
 app.include_router(task_router)
 app.include_router(auth_router)

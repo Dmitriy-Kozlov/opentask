@@ -8,11 +8,20 @@
 
 <h1>{{headline}}</h1>
 
-<div>
-    <a href="/pages/tasks?is_completed=true" class="card-link">Завершенные</a>
-    <a href="/pages/tasks?is_completed=false" class="card-link">Открытые</a>
-    <a href="/pages/tasks" class="card-link">Все</a>
-</div>
+<!--<div>-->
+<!--    <a href="/pages/tasks?is_completed=true" class="card-link">Завершенные</a>-->
+<!--    <a href="/pages/tasks?is_completed=false" class="card-link">Открытые</a>-->
+<!--    <a href="/pages/tasks" class="card-link">Все</a>-->
+<!--</div>-->
+
+
+<form method="GET" id="is_completed"  action="">
+    <select name="is_completed" class="form-select form-select-sm" aria-label="Small select example">
+  <option value=false>Открытые</option>
+  <option value=true>Завершенные</option>
+</select>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
 
 <div>
     {% for task in tasks %}
