@@ -24,7 +24,7 @@ authentication_backend = AdminAuth(secret_key=SECRET)
 
 
 class UserAdmin(ModelView, model=User):
-    column_list = [User.id, User.username, User.is_superuser]
+    column_list = [User.id, User.username, User.lastname, User.firstname, User.is_superuser]
 
 
 class TaskAdmin(ModelView, model=Task):

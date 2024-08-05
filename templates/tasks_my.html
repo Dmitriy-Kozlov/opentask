@@ -8,17 +8,27 @@
 
 <h1>{{headline}}{% if point_user %} {{point_user.lastname}} {{point_user.firstname}}{% endif %}</h1>
 
-<div>
-    {% if point_user %}
-    <a href="/pages/tasks/user/{{point_user.id}}/?is_completed=true" class="card-link">Завершенные</a>
-    <a href="/pages/tasks/user/{{point_user.id}}/?is_completed=false" class="card-link">Открытые</a>
-    <a href="/pages/tasks/user/{{point_user.id}}/" class="card-link">Все</a>
-    {% else %}
-    <a href="/pages/tasks/me/?is_completed=true" class="card-link">Завершенные</a>
-    <a href="/pages/tasks/me/?is_completed=false" class="card-link">Открытые</a>
-    <a href="/pages/tasks/me/" class="card-link">Все</a>
-    {% endif %}
-</div>
+<!--<div>-->
+<!--    {% if point_user %}-->
+<!--    <a href="/pages/tasks/user/{{point_user.id}}/?is_completed=true" class="card-link">Завершенные</a>-->
+<!--    <a href="/pages/tasks/user/{{point_user.id}}/?is_completed=false" class="card-link">Открытые</a>-->
+<!--    <a href="/pages/tasks/user/{{point_user.id}}/" class="card-link">Все</a>-->
+<!--    {% else %}-->
+<!--    <a href="/pages/tasks/me/?is_completed=true" class="card-link">Завершенные</a>-->
+<!--    <a href="/pages/tasks/me/?is_completed=false" class="card-link">Открытые</a>-->
+<!--    <a href="/pages/tasks/me/" class="card-link">Все</a>-->
+<!--    {% endif %}-->
+<!--</div>-->
+
+
+<form method="GET" id="is_completed"  action="">
+    <select name="is_completed" class="form-select form-select-sm" aria-label="Small select example">
+  <option value=true>Завершенные</option>
+  <option value=false>Открытые</option>
+</select>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
 
 <div>
     {% for task in tasks %}
