@@ -19,12 +19,20 @@ class AdminAuth(AuthenticationBackend):
             raise HTTPException(status_code=403, detail="Not authorized to administrate")
         return True
 
+    async def logout(self, request: Request) -> bool:
+        """Implement logout logic here.
+        This will usually clear the session with `request.session.clear()`.
+        """
+        request.session.clear()
+        return True
+        # raise NotImplementedError()
+
 
 authentication_backend = AdminAuth(secret_key=SECRET)
 
 
 class UserAdmin(ModelView, model=User):
-    column_list = [User.id, User.username, User.lastname, User.firstname, User.is_superuser]
+    column_list = [User.id, User.username, User.lastname, User.firstname, User.is_superuser, User.is_verified]
 
 
 class TaskAdmin(ModelView, model=Task):
