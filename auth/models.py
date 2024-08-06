@@ -7,6 +7,7 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.ext.asyncio import AsyncSession
 from database import Base, get_async_session
+from task.models import UserTask, TaskFile
 
 
 class User(SQLAlchemyBaseUserTable[int], Base):
