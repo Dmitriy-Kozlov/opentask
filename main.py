@@ -46,7 +46,7 @@ app.include_router(
     tags=["users"]
 )
 
-admin = Admin(app, engine, authentication_backend=authentication_backend)
+admin = Admin(app, engine, templates_dir='templates/admin', authentication_backend=authentication_backend)
 admin.add_view(UserAdmin)
 admin.add_view(TaskAdmin)
 admin.add_view(UserTaskAdmin)
