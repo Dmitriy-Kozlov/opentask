@@ -3,7 +3,7 @@ import os
 import shutil
 
 from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile, File
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, desc
 from sqlalchemy.orm import joinedload, selectinload, contains_eager
 from sqlalchemy.exc import NoResultFound
 from starlette.responses import FileResponse, StreamingResponse
@@ -44,7 +44,7 @@ async def get_tasks(session: AsyncSession = Depends(get_async_session),
     query = (
         select(Task).outerjoin(Task.users).outerjoin(UserTask.user)
         .options(contains_eager(Task.users).contains_eager(UserTask.user))
-        .options(joinedload(Task.files))
+        .options(joinedload(Task.files)).order_by(Task.id.desc())
     )
     if is_completed is not None:
         query = query.filter(UserTask.completed == is_completed)
@@ -63,7 +63,8 @@ async def get_user_tasks(
     if not user.is_superuser:
         raise HTTPException(status_code=403, detail="Not authorized to get tasklist")
     query = (
-        select(UserTask).options(selectinload(UserTask.task).selectinload(Task.files)).filter_by(users_id=user_id)
+        select(UserTask).options(selectinload(UserTask.task).selectinload(Task.files))
+        .filter_by(users_id=user_id).order_by(UserTask.tasks_id.desc())
     )
     if is_completed is not None:
         query = query.filter(UserTask.completed == is_completed)
@@ -80,7 +81,8 @@ async def get_my_tasks(session: AsyncSession = Depends(get_async_session),
                     is_completed: bool = None
                     ):
     query = (
-        select(UserTask).options(selectinload(UserTask.task).selectinload(Task.files)).filter_by(users_id=user.id)
+        select(UserTask).options(selectinload(UserTask.task).selectinload(Task.files))
+        .filter_by(users_id=user.id).order_by(UserTask.tasks_id.desc())
     )
     if is_completed is not None:
         query = query.filter(UserTask.completed == is_completed)
