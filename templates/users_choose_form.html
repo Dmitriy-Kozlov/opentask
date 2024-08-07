@@ -7,7 +7,7 @@
 </head>
 <body>
 <h1>Задача №{{task_id}}</h1>
-<form id="user-form">
+<form id="user-form" method="get" action="/pages/tasks">
   <div class="mb-3">
   <select class="form-select" id="select-users" multiple aria-label="Выберите пользователей">
       {% for user_db in users %}
@@ -15,11 +15,9 @@
       {% endfor %}
 </select>
   </div>
-  <button type="submit" class="btn btn-primary" onclick="setUserFunction({{task_id}})">Подтвердить</button>
-<!--  <button type="submit" class="btn btn-primary">Подтвердить</button>-->
-</form>
-<form id="file-form-2" method="get" action="/pages/tasks">
+  <button class="btn btn-primary" onclick="setUserFunction({{task_id}})">Подтвердить</button>
       <button type="submit" class="btn btn-secondary">Пропустить</button>
+<!--  <button type="submit" class="btn btn-primary">Подтвердить</button>-->
 </form>
 
 

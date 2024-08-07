@@ -36,7 +36,19 @@
 
       <ul class="list-group list-group-flush">
           {% for user in task.users %}
-    <li class="list-group-item">{{user.user.lastname}} {{user.user.firstname}}, статус: - {% if user.completed %}Завершена{% else %}Открыта{% endif %}</li>
+        <li class="list-group-item">
+            <p>
+                {{user.user.lastname}} {{user.user.firstname}}, статус: - {% if user.completed %}Завершена{% else %}Открыта{% endif %}
+                 <br>
+                {% if user.created_at %}
+                Назначена - {{user.created_at.strftime('%d-%m-%Y %H:%M')}}UTC;
+                {% endif %}
+                {% if user.finished_at %}
+                <br>
+                Завершена - {{user.finished_at.strftime('%d-%m-%Y %H:%M')}}UTC
+                {% endif %}
+            </p>
+        </li>
           {% endfor %}
     <li class="list-group-item">
           <a href="/pages/tasks/{{task.id}}/set_users">Назначить пользователей</a>
@@ -51,6 +63,9 @@
             </div>
             {% endfor %}
         </ul>
+        <li class="list-group-item">
+          <a href="/pages/tasks/{{task.id}}/upload">Добавить файлы</a>
+    </li>
   </div>
 </div>
             {% endfor %}

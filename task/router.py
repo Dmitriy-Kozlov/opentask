@@ -1,3 +1,4 @@
+import datetime
 import os
 import shutil
 
@@ -138,6 +139,7 @@ async def complete_task(task_id: int,
         if task.completed:
             raise HTTPException(status_code=403, detail="Task already completed")
         task.completed = True
+        task.finished_at = datetime.datetime.utcnow()
         session.add(task)
         await session.commit()
         return {"message": f"Task {task_id} completed"}

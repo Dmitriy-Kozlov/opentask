@@ -7,16 +7,14 @@
 </head>
 <body>
 <!--<form id="file-form" method="post" action="/tasks/{{task_id}}/upload" enctype="multipart/form-data">-->
-<form id="file-form">
+<form id="file-form" method="get" action="/pages/tasks/{{task_id}}/set_users">
   <div class="mb-3">
     <label for="files" class="form-label">Выберите файлы</label>
     <input type="file" name="files" multiple class="form-control" id="files" aria-describedby="headlineHelp">
     <div id="headlineHelp" class="form-text"></div>
   </div>
 <!--  <button type="submit" class="btn btn-primary">Загрузить</button>-->
-  <button type="submit" class="btn btn-primary" onclick="fileUploadFunction({{task_id}})">Загрузить</button>
-</form>
-<form id="file-form-2" method="get" action="/pages/tasks/{{task_id}}/set_users">
+  <button class="btn btn-primary" onclick="fileUploadFunction({{task_id}})">Загрузить</button>
       <button type="submit" class="btn btn-secondary">Пропустить</button>
 </form>
 

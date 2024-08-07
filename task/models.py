@@ -13,6 +13,8 @@ class UserTask(Base):
     users_id = Column(ForeignKey('users.id'), primary_key=True)
     tasks_id = Column(ForeignKey('tasks.id'), primary_key=True)
     completed = Column(Boolean, default=False)
+    created_at: Mapped[created_at]
+    finished_at: Mapped[datetime.datetime] = mapped_column(nullable=True)
     task = relationship("Task", back_populates="users")
     user = relationship("User", back_populates="tasks")
 
