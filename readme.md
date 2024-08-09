@@ -5,3 +5,5 @@ login: admin@admin.com, password: admin <br>
 Создано на FastAPI, документация /docs <br>
 База данных - sqlite <br>
 Пример можно посмотреть на /pages <br>
+Админка выполнена на sqladmin <br>
+Модель пользователя на fastapi-users
